@@ -1,18 +1,29 @@
-const API_BASE_URL = 'http://localhost:5000/api/mascotas';
+const API_BASE_URL = '/api/mascotas';
 
 async function request(url, options = {}) {
   try {
     const response = await fetch(url, options);
-    const payload = await response.json();
+    const contentType = response.headers.get('content-type') || '';
+    let payload = null;
+
+    // Intentamos leer JSON solo cuando el servidor realmente lo envia.
+    if (contentType.includes('application/json')) {
+      payload = await response.json();
+    } else {
+      const rawBody = await response.text();
+
+      if (!response.ok) {
+        throw new Error(rawBody || 'El servidor devolvio una respuesta no valida.');
+      }
+    }
 
     if (!response.ok) {
-      throw new Error(payload.message || 'No fue posible procesar la solicitud.');
+      throw new Error(payload?.message || 'No fue posible procesar la solicitud.');
     }
 
     return payload;
   } catch (error) {
-    // Cuando el backend esta apagado, fetch lanza TypeError y no trae JSON.
-    if (error instanceof TypeError) {
+    if (error instanceof TypeError || error instanceof SyntaxError) {
       throw new Error('No se pudo conectar con el servidor. Verifica que el backend este encendido en el puerto 5000.');
     }
 

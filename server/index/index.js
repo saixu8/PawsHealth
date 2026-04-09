@@ -8,6 +8,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const petsRoutes = require('../routes/pets.routes');
+const authRoutes = require('../routes/auth.routes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 
 // Rutas de modulos.
 app.use('/api/mascotas', petsRoutes);
+app.use('/api/auth', authRoutes);
 
 // Si alguien llega a una ruta que no existe, respondemos de forma controlada.
 app.use((req, res) => {
